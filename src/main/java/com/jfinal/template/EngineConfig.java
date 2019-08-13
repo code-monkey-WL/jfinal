@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2017, James Zhan 詹波 (jfinal@126.com).
+ * Copyright (c) 2011-2019, James Zhan 詹波 (jfinal@126.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import com.jfinal.template.source.ISource;
 import com.jfinal.template.source.ISourceFactory;
 import com.jfinal.template.source.StringSource;
 import com.jfinal.template.stat.Location;
+import com.jfinal.template.stat.OutputDirectiveFactory;
 import com.jfinal.template.stat.Parser;
 import com.jfinal.template.stat.ast.Define;
 import com.jfinal.template.stat.ast.Output;
@@ -48,14 +49,14 @@ public class EngineConfig {
 	
 	WriterBuffer writerBuffer = new WriterBuffer();
 	
-	private Map<String, Define> sharedFunctionMap = new HashMap<String, Define>();
+	private Map<String, Define> sharedFunctionMap = createSharedFunctionMap();		// new HashMap<String, Define>(512, 0.25F);
 	private List<ISource> sharedFunctionSourceList = new ArrayList<ISource>();		// for devMode only
 	
 	Map<String, Object> sharedObjectMap = null;
 	
-	private IOutputDirectiveFactory outputDirectiveFactory = OutputDirectiveFactory.me;
+	private OutputDirectiveFactory outputDirectiveFactory = OutputDirectiveFactory.me;
 	private ISourceFactory sourceFactory = new FileSourceFactory();
-	private Map<String, Class<? extends Directive>> directiveMap = new HashMap<String, Class<? extends Directive>>();
+	private Map<String, Class<? extends Directive>> directiveMap = new HashMap<String, Class<? extends Directive>>(64, 0.5F);
 	private SharedMethodKit sharedMethodKit = new SharedMethodKit();
 	
 	private boolean devMode = false;
@@ -72,9 +73,9 @@ public class EngineConfig {
 		addDirective("string", StringDirective.class);
 		addDirective("random", RandomDirective.class);
 		addDirective("number", NumberDirective.class);
+		addDirective("call", CallDirective.class);
 		
 		// Add official shared method of Template Engine
-		// addSharedMethod(new Json());
 		addSharedMethod(new SharedMethodLib());
 	}
 	
@@ -82,6 +83,7 @@ public class EngineConfig {
 	 * Add shared function with file
 	 */
 	public void addSharedFunction(String fileName) {
+		fileName = fileName.replace("\\", "/");
 		// FileSource fileSource = new FileSource(baseTemplatePath, fileName, encoding);
 		ISource source = sourceFactory.getSource(baseTemplatePath, fileName, encoding);
 		doAddSharedFunction(source, fileName);
@@ -179,7 +181,7 @@ public class EngineConfig {
 	 * 开发者可直接使用模板注释功能将不需要的 function 直接注释掉
 	 */
 	private synchronized void reloadSharedFunctionSourceList() {
-		Map<String, Define> newMap = new HashMap<String, Define>();
+		Map<String, Define> newMap = createSharedFunctionMap();
 		for (int i = 0, size = sharedFunctionSourceList.size(); i < size; i++) {
 			ISource source = sharedFunctionSourceList.get(i);
 			String fileName = source instanceof FileSource ? ((FileSource)source).getFileName() : null;
@@ -194,23 +196,33 @@ public class EngineConfig {
 		this.sharedFunctionMap = newMap;
 	}
 	
+	private Map<String, Define> createSharedFunctionMap() {
+		return new HashMap<String, Define>(512, 0.25F);
+	}
+	
 	public synchronized void addSharedObject(String name, Object object) {
 		if (sharedObjectMap == null) {
-			sharedObjectMap = new HashMap<String, Object>();
+			sharedObjectMap = new HashMap<String, Object>(64, 0.25F);
 		} else if (sharedObjectMap.containsKey(name)) {
 			throw new IllegalArgumentException("Shared object already exists: " + name);
 		}
 		sharedObjectMap.put(name, object);
 	}
 	
-	Map<String, Object> getSharedObjectMap() {
+	public Map<String, Object> getSharedObjectMap() {
 		return sharedObjectMap;
+	}
+	
+	public synchronized void removeSharedObject(String name) {
+		if (sharedObjectMap != null) {
+			sharedObjectMap.remove(name);
+		}
 	}
 	
 	/**
 	 * Set output directive factory
 	 */
-	public void setOutputDirectiveFactory(IOutputDirectiveFactory outputDirectiveFactory) {
+	public void setOutputDirectiveFactory(OutputDirectiveFactory outputDirectiveFactory) {
 		if (outputDirectiveFactory == null) {
 			throw new IllegalArgumentException("outputDirectiveFactory can not be null");
 		}
@@ -256,8 +268,9 @@ public class EngineConfig {
 			throw new IllegalArgumentException("baseTemplatePath can not be blank");
 		}
 		baseTemplatePath = baseTemplatePath.trim();
+		baseTemplatePath = baseTemplatePath.replace("\\", "/");
 		if (baseTemplatePath.length() > 1) {
-			if (baseTemplatePath.endsWith("/") || baseTemplatePath.endsWith("\\")) {
+			if (baseTemplatePath.endsWith("/")) {
 				baseTemplatePath = baseTemplatePath.substring(0, baseTemplatePath.length() - 1);
 			}
 		}

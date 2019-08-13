@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2017, James Zhan 詹波 (jfinal@126.com).
+ * Copyright (c) 2011-2019, James Zhan 詹波 (jfinal@126.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import com.jfinal.config.Plugins;
 import com.jfinal.config.Handlers;
 import com.jfinal.config.Interceptors;
 import com.jfinal.kit.PathKit;
+import com.jfinal.kit.StrKit;
 import com.jfinal.log.Log;
 import com.jfinal.log.LogManager;
 import com.jfinal.plugin.IPlugin;
@@ -44,15 +45,31 @@ class Config {
 	}
 	
 	/*
-	 * Config order: constant, plugin, route, engine, interceptor, handler
+	 * Config order: constant, interceptor, route, plugin, engine, handler
 	 */
 	static void configJFinal(JFinalConfig jfinalConfig) {
 		jfinalConfig.configConstant(constants);			initLogFactory();	initEngine();
-		jfinalConfig.configPlugin(plugins);				startPlugins();		// very important!!!
-		jfinalConfig.configRoute(routes);
-		jfinalConfig.configEngine(engine);
+		
+		configPluginWithOrder(1, jfinalConfig);
 		jfinalConfig.configInterceptor(interceptors);
+		
+		configPluginWithOrder(2, jfinalConfig);
+		jfinalConfig.configRoute(routes);
+		
+		configPluginWithOrder(3, jfinalConfig);
+		jfinalConfig.configEngine(engine);
+		
+		configPluginWithOrder(4, jfinalConfig);
 		jfinalConfig.configHandler(handlers);
+		
+		configPluginWithOrder(5, jfinalConfig);
+	}
+	
+	private static void configPluginWithOrder(int order, JFinalConfig jfinalConfig) {
+		if (order == constants.getConfigPluginOrder()) {
+			jfinalConfig.configPlugin(plugins);
+			startPlugins();		// very important!!!
+		}
 	}
 	
 	/**
@@ -61,7 +78,11 @@ class Config {
 	 */
 	private static void initEngine() {
 		engine.setDevMode(constants.getDevMode());
-		engine.setBaseTemplatePath(PathKit.getWebRootPath());
+		
+		// 避免在某些环境下 webRootPath 值为 blank 时无法启动项目
+		if (StrKit.notBlank(PathKit.getWebRootPath())) {
+			engine.setBaseTemplatePath(PathKit.getWebRootPath());
+		}
 	}
 	
 	public static final Constants getConstants() {

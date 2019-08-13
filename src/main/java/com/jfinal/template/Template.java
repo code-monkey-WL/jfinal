@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2017, James Zhan 詹波 (jfinal@126.com).
+ * Copyright (c) 2011-2019, James Zhan 詹波 (jfinal@126.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package com.jfinal.template;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.util.Map;
@@ -105,7 +108,27 @@ public class Template {
 	public StringBuilder renderToStringBuilder(Map<?, ?> data) {
 		FastStringWriter fsw = new FastStringWriter();
 		render(data, fsw);
-		return fsw.getBuffer();
+		return fsw.toStringBuilder();
+	}
+	
+	/**
+	 * 渲染到 File 中去
+	 * 适用于代码生成器类似应用场景
+	 */
+	public void render(Map<?, ?> data, File file) {
+		try (FileOutputStream fos = new FileOutputStream(file)) {
+			render(data, fos);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	/**
+	 * 渲染到 String fileName 参数所指定的文件中去
+	 * 适用于代码生成器类似应用场景
+	 */
+	public void render(Map<?, ?> data, String fileName) {
+		render(data, new File(fileName));
 	}
 	
 	public boolean isModified() {

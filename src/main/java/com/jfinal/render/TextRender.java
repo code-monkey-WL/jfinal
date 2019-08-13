@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2017, James Zhan 詹波 (jfinal@126.com).
+ * Copyright (c) 2011-2019, James Zhan 詹波 (jfinal@126.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@ import java.io.PrintWriter;
 public class TextRender extends Render {
 	
 	// 与 encoding 与 contentType 在 render() 方法中分开设置，效果相同
-	private static final String DEFAULT_CONTENT_TYPE = "text/plain";
+	protected static final String DEFAULT_CONTENT_TYPE = "text/plain";
 	
-	private String text;
-	private String contentType;
+	protected String text;
+	protected String contentType;
 	
 	public TextRender(String text) {
 		this.text = text;
@@ -52,12 +52,19 @@ public class TextRender extends Render {
 			response.setHeader("Cache-Control", "no-cache");
 			response.setDateHeader("Expires", 0);
 			
-			response.setContentType(contentType);
-			response.setCharacterEncoding(getEncoding());	// 与 contentType 分开设置
+			
+			String ct = getContentType();
+			response.setContentType(ct);
+			
+			// 不包含 "charset" 时才调用该方法，否则该方法会覆盖掉 contentType 中的 "charset" 部分
+			if (ct.indexOf("charset") == -1) {
+				response.setCharacterEncoding(getEncoding());	// 与 contentType 分开设置
+			}
+			
 			
 			writer = response.getWriter();
 			writer.write(text);
-			writer.flush();
+			// writer.flush();
 		} catch (IOException e) {
 			throw new RenderException(e);
 		}

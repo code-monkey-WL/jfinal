@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2017, James Zhan 詹波 (jfinal@126.com).
+ * Copyright (c) 2011-2019, James Zhan 詹波 (jfinal@126.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import com.jfinal.template.stat.Scope;
  */
 public class NowDirective extends Directive {
 	
-	public void setExrpList(ExprList exprList) {
+	public void setExprList(ExprList exprList) {
 		if (exprList.length() > 1) {
 			throw new ParseException("#now directive support one parameter only", location);	
 		}

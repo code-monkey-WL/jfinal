@@ -4,7 +4,7 @@
 	<artifactId>jfinal</artifactId>
 	<packaging>jar</packaging>
 	<name>JFinal</name>
-	<version>3.3</version>
+	<version>4.3</version>
 	<url>http://www.jfinal.com</url>
 	<description>JFinal is a simple, light, rapid,independent, extensible Java WEB + ORM framework. The feature of JFinal looks like ruby on rails especially ActiveRecord.</description>
 	
@@ -15,7 +15,7 @@
 	
 	<issueManagement>
 		<system>Github Issue</system>
-		<url>http://github.com/jfinal/jfinal/issues</url>
+		<url>https://gitee.com/jfinal/jfinal/issues</url>
 	</issueManagement>
 	<licenses>
 		<license>
@@ -32,9 +32,9 @@
 		</developer>
 	</developers>
 	<scm>
-		<connection>scm:git:git@github.com:jfinal/jfinal.git</connection>
-		<developerConnection>scm:git:git@github.com:jfinal/jfinal.git</developerConnection>
-		<url>git@github.com:jfinal/jfinal.git</url>
+		<connection>scm:git:git@gitee.com:jfinal/jfinal.git</connection>
+		<developerConnection>scm:git:git@gitee.com:jfinal/jfinal.git</developerConnection>
+		<url>git@gitee.com:jfinal/jfinal.git</url>
 	</scm>
 	
 	<parent>
@@ -45,6 +45,11 @@
 
 	<repositories>
 	</repositories>
+	
+	<!--
+		所有 dependency 都仅仅是可选项，仅当实际用到第三方时才需要引入
+		注意在 copy 引入下面的依赖时，要去掉 <scope>provided</scope> 才能生效
+	 -->
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -52,10 +57,12 @@
 			<version>4.8.2</version>
 			<scope>test</scope>
 		</dependency>
+		
+		<!-- jetty-server 仅用于开发，现已被 jfinal-undertow 项目所取代 -->
 		<dependency>
 			<groupId>com.jfinal</groupId>
 			<artifactId>jetty-server</artifactId>
-			<version>8.1.8</version>
+			<version>2019.3</version>
 			<scope>provided</scope>
 		</dependency>
 		<!-- dependency>
@@ -64,55 +71,71 @@
 			<version>3.1.0</version>
 			<scope>provided</scope>
 		</dependency -->
-		<!-- jsp support by jetty -->
+		<!-- jetty-server 开发时支持 JSP -->
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-jsp</artifactId>
-			<version>8.1.8.v20121106</version>
+			<version>9.2.26.v20180806</version>
 			<scope>provided</scope>
 		</dependency>
+		
+		<!-- c3p0 数据源连接池 -->
 		<dependency>
 			<groupId>com.mchange</groupId>
 			<artifactId>c3p0</artifactId>
-			<version>0.9.5.1</version>
+			<version>0.9.5.3</version>
 			<scope>provided</scope>
 		</dependency>
+		
+		<!-- druid 数据源连接池 -->
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>druid</artifactId>
 			<version>1.0.29</version>
 			<scope>provided</scope>
 		</dependency>
+		
+		<!-- fastjson json 转换 -->
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
-			<version>1.2.31</version>
+			<version>1.2.55</version>
 			<scope>provided</scope>
 		</dependency>
+		
+		<!-- HikariCP 数据源连接池 -->
 		<dependency>
 			<groupId>com.zaxxer</groupId>
-			<artifactId>HikariCP-java6</artifactId>
+			<artifactId>HikariCP</artifactId>
 			<version>2.3.13</version>
 			<scope>provided</scope>
 		</dependency>
+		
+		<!-- ehcache 缓存 -->
 		<dependency>
 			<groupId>net.sf.ehcache</groupId>
 			<artifactId>ehcache-core</artifactId>
-			<version>2.6.6</version>
+			<version>2.6.11</version>
 			<scope>provided</scope>
 		</dependency>
+		
+		<!-- freemarkder 模板引擎 -->
 		<dependency>
 			<groupId>org.freemarker</groupId>
 			<artifactId>freemarker</artifactId>
 			<version>2.3.20</version>
 			<scope>provided</scope>
 		</dependency>
+		
+		<!-- log4j 日志 -->
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>1.2.16</version>
 			<scope>provided</scope>
 		</dependency>
+		
+		<!-- velocity 模板引擎 -->
 		<dependency>
 			<groupId>org.apache.velocity</groupId>
 			<artifactId>velocity</artifactId>
@@ -125,18 +148,16 @@
 			<version>2.0</version>
 			<scope>provided</scope>
 		</dependency>
-		<!-- cos -->
+		
+		<!-- cos 文件上传 -->
 		<dependency>
 			<groupId>com.jfinal</groupId>
 			<artifactId>cos</artifactId>
 			<version>2017.5</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>cglib</groupId>
-			<artifactId>cglib-nodep</artifactId>
-			<version>3.2.5</version>
-		</dependency>
+		
+		<!-- redis 客户端 -->
 		<dependency>
 			<groupId>redis.clients</groupId>
 			<artifactId>jedis</artifactId>
@@ -159,32 +180,46 @@
 		</dependency>
 		-->
 		
+		<!-- jackson json 转换 -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.4.3</version>
+			<version>2.8.11.1</version>
 			<scope>provided</scope>
 		</dependency>
 		
+		<!-- cron4j 任务调度 -->
 		<dependency>
 			<groupId>it.sauronsoftware.cron4j</groupId>
 			<artifactId>cron4j</artifactId>
 			<version>2.2.5</version>
 			<scope>provided</scope>
 		</dependency>
+		
+		<!-- zxing 二维码生成 -->
 		<dependency>
 			<groupId>com.google.zxing</groupId>
 			<artifactId>javase</artifactId>
 			<version>3.2.1</version>
 			<scope>provided</scope>
-		 </dependency>
-		 
+		</dependency>
+		
+		<!-- cglib 扩展 CglibProxyFactory extends ProxyFactory -->
+		<dependency>
+			<groupId>cglib</groupId>
+			<artifactId>cglib-nodep</artifactId>
+			<version>3.2.5</version>
+			<scope>provided</scope>
+		</dependency>
+		
+		<!-- 支持在 spring 之中整合使用 jfinal -->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
 			<version>4.3.8.RELEASE</version>
 			<scope>provided</scope>
 		</dependency>
+		
 	</dependencies>
 	
 	<build>
@@ -206,8 +241,10 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.6.1</version>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+					<!-- <compilerArgument>-parameters</compilerArgument> -->
+					<source>1.8</source>
+					<target>1.8</target>
+					<encoding>UTF-8</encoding>
 				</configuration>
 			</plugin>
 			
@@ -224,21 +261,21 @@
 				</configuration>
 			</plugin>
 
-<!-- 安装源码到本地仓库 -->
-<plugin>
-	<groupId>org.apache.maven.plugins</groupId>
-	<artifactId>maven-source-plugin</artifactId>
-	<version>2.1.2</version>
-	<executions>
-		<execution>
-			<id>attach-sources</id>
-			<phase>verify</phase>
-			<goals>
-				<goal>jar-no-fork</goal>
-			</goals>
-		</execution>
-	</executions>
-</plugin>
+			<!-- 安装源码到本地仓库 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.1.2</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -254,10 +291,12 @@
 				  </execution>
 				</executions>
 				<configuration>
-					<skip>true</skip>
+					<skip>false</skip>
 				</configuration>
 			</plugin>
 
 		</plugins>
 	</build>
 </project>
+
+

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2017, James Zhan 詹波 (jfinal@126.com).
+ * Copyright (c) 2011-2019, James Zhan 詹波 (jfinal@126.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,10 @@ public abstract class Dialect {
 	public abstract String forDbDeleteById(String tableName, String[] pKeys);
 	public abstract void forDbSave(String tableName, String[] pKeys, Record record, StringBuilder sql, List<Object> paras);
 	public abstract void forDbUpdate(String tableName, String[] pKeys, Object[] ids, Record record, StringBuilder sql, List<Object> paras);
+	
+	public String forFindAll(String tableName) {
+		return "select * from " + tableName;
+	}
 	
 	/**
 	 * 指示 Generator、ModelBuilder、RecordBuilder 是否保持住 Byte、Short 类型
@@ -126,7 +130,7 @@ public abstract class Dialect {
 	}
 	
 	@SuppressWarnings("rawtypes")
-	public <T> List<T> buildModelList(ResultSet rs, Class<? extends Model> modelClass) throws SQLException, InstantiationException, IllegalAccessException {
+	public <T> List<T> buildModelList(ResultSet rs, Class<? extends Model> modelClass) throws SQLException, ReflectiveOperationException {
 		return modelBuilder.build(rs, modelClass);
 	}
 	
@@ -272,10 +276,16 @@ public abstract class Dialect {
 	protected void fillStatementHandleDateType(PreparedStatement pst, List<Object> paras) throws SQLException {
 		for (int i=0, size=paras.size(); i<size; i++) {
 			Object value = paras.get(i);
-			if (value instanceof java.sql.Date) {
-				pst.setDate(i + 1, (java.sql.Date)value);
-			} else if (value instanceof java.sql.Timestamp) {
-				pst.setTimestamp(i + 1, (java.sql.Timestamp)value);
+			if (value instanceof java.util.Date) {
+				if (value instanceof java.sql.Date) {
+					pst.setDate(i + 1, (java.sql.Date)value);
+				} else if (value instanceof java.sql.Timestamp) {
+					pst.setTimestamp(i + 1, (java.sql.Timestamp)value);
+				} else {
+					// Oracle、SqlServer 中的 TIMESTAMP、DATE 支持 new Date() 给值
+					java.util.Date d = (java.util.Date)value;
+					pst.setTimestamp(i + 1, new java.sql.Timestamp(d.getTime()));
+				}
 			} else {
 				pst.setObject(i + 1, value);
 			}
@@ -288,10 +298,16 @@ public abstract class Dialect {
 	protected void fillStatementHandleDateType(PreparedStatement pst, Object... paras) throws SQLException {
 		for (int i=0; i<paras.length; i++) {
 			Object value = paras[i];
-			if (value instanceof java.sql.Date) {
-				pst.setDate(i + 1, (java.sql.Date)value);
-			} else if (value instanceof java.sql.Timestamp) {
-				pst.setTimestamp(i + 1, (java.sql.Timestamp)value);
+			if (value instanceof java.util.Date) {
+				if (value instanceof java.sql.Date) {
+					pst.setDate(i + 1, (java.sql.Date)value);
+				} else if (value instanceof java.sql.Timestamp) {
+					pst.setTimestamp(i + 1, (java.sql.Timestamp)value);
+				} else {
+					// Oracle、SqlServer 中的 TIMESTAMP、DATE 支持 new Date() 给值
+					java.util.Date d = (java.util.Date)value;
+					pst.setTimestamp(i + 1, new java.sql.Timestamp(d.getTime()));
+				}
 			} else {
 				pst.setObject(i + 1, value);
 			}
